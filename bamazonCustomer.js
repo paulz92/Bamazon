@@ -1,7 +1,7 @@
 // npm requirements
 var inquirer = require("inquirer");
 var mysql = require("mysql");
-var consoleTable = require("console.table");
+var consoleTableNPM = require("console.table");
 // my password for mysql db connection - hidden
 var pw = require("./pw.js");
 
@@ -46,7 +46,7 @@ function welcome() {
 	});
 }
 
-// welcome screen function on opening app
+// view items function
 function viewItems() {
 	// save my sql query
 	var query = "SELECT item_id, product_name, price, stock_quantity FROM products";
@@ -54,14 +54,9 @@ function viewItems() {
 	connection.query(query, function(error, results) {
 		// if error, tell us
 		if (error) throw error;
-		// display all items, id, price
-		console.log(" "); // space for node aesthetics
-		for (var i = 0; i < results.length; i++) {
-			console.log("Item ID: " + results[i].item_id + " | Item: " 
-				+ results[i].product_name + " | Price: $" + results[i].price);
-		}
-		console.log(" "); // space for node aesthetics
-		// inquire customer what they'd like to buy and how much qty
+		// call the console table function to build/display the items table
+		consoleTable(results);
+		// ask customer what they'd like to buy and how much qty
 		inquirer.prompt([
 			{
 				name: "id",
@@ -102,12 +97,12 @@ function viewItems() {
 			// if user tries to buy more qty than db has available, tell them no, run the
 			// welcome function again
 			if (parseInt(transaction.qty) > itemQty) {
-				console.log("\nInsufficient inventory for your requested quantity!" 
-					+ " Try again.\n");
+				console.log("\nInsufficient inventory for your requested quantity. We have " 
+					+ itemQty + " in stock. Try again.\n");
 				welcome();
 			} 
 			// if user tries to buy equal/less qty than db has available, tell them yes,
-			// update the database to reduce qty by customer purchase amt
+			// update the db to reduce qty by customer purchase amt
 			else if (parseInt(transaction.qty) <= itemQty) {
 				console.log("\nCongrats! You successfully purchased " + transaction.qty 
 					+ " of " + itemName + ".");
@@ -115,6 +110,26 @@ function viewItems() {
 			}
 		});
 	});
+}
+
+// function for building the items table for customers to view
+function consoleTable(results) {
+	// create empty values array
+	var values = [];
+	// loop through all results
+	for (var i = 0; i < results.length; i++) {
+		// create resultObject for each iteration. properties of object will be column
+		// headings in the console table
+		var resultObject = {
+			ID: results[i].item_id,
+			Item: results[i].product_name,
+			Price: "$" + results[i].price
+		};
+		// push result object to values array
+		values.push(resultObject);
+	}
+	// create table with title items for sale with the values array
+	console.table("\nItems for Sale", values);
 }
 
 // reduce stock qty function

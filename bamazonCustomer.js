@@ -139,8 +139,12 @@ function lowerQty(item, purchaseQty, stockQty, price) {
 	connection.query(
 		"UPDATE products SET ? WHERE ?", 
 		[
-			{stock_quantity: stockQty - parseInt(purchaseQty)},
-			{item_id: parseInt(item)}
+			{
+				stock_quantity: stockQty - parseInt(purchaseQty)
+			},
+			{
+				item_id: parseInt(item)
+			}
 		],
 		// throw error if error, else run displayCost
 		function(error, response) {

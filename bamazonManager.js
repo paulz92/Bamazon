@@ -86,6 +86,8 @@ function addToInventory() {
 	// query db for all products
 	connection.query("SELECT * FROM products", function (error, results) {
 		if (error) throw error;
+		// show manager current product list so they know which item id to select
+		consoleTable("\nCurrent Inventory Data", results);
 		// ask manager which item id they'd like to add inventory to and by how much
 		inquirer.prompt([
 			{
@@ -142,7 +144,7 @@ function increaseQty(item, stockQty, addQty) {
 		], 
 		function(error, results) {
 			if (error) throw error;
-			console.log("\nInventory successfully added.");
+			console.log("\nInventory successfully increased.");
 			// run viewProducts so manager can see the updated inventory and return
 			// to welcome screen
 			viewProducts();
@@ -151,9 +153,66 @@ function increaseQty(item, stockQty, addQty) {
 
 // function to add new product
 function addNewProduct() {
-	console.log("\nadd new product\n");
-	// run welcome function
-	welcome();
+	// collect item data
+	inquirer.prompt([
+		{
+			name: "item",
+			message: "Input new item to add."
+		},
+		{
+			name: "department",
+			type: "list",
+			choices: ["Music", "Movies", "Electronics", "Toys", "Household", "Clothes",
+				"Hardware", "Sports Equipment", "Other"],
+			message: "Which department does this item belong in?"
+		},
+		{
+			name: "price",
+			message: "How much does this item cost?",
+			// validate the cost is a number above/equal to 0 (could be free)
+			validate: function(value) {
+				if (value >= 0 && isNaN(value) === false) {
+					return true;
+				}
+				return false;
+			}
+		},
+		{
+			name: "inventory",
+			message: "How much inventory do we have?",
+			// validate the qty is a number above 0
+			validate: function(value) {
+				if (value > 0 && isNaN(value) === false) {
+					return true;
+				}
+				return false;
+			}			
+		}
+	]).then(function(newItem) {
+		// then call the add item to dB function with values from inquirer
+		addItemToDb(newItem.item, newItem.department, 
+			parseFloat(newItem.price).toFixed(2), parseInt(newItem.inventory));
+	});
+}
+
+// add item to db function
+function addItemToDb(item, department, price, quantity) {
+	// query for creating table row, set vals for each column equal to parameters
+	connection.query(
+		"INSERT INTO products SET ?", 
+		{
+			product_name: item,
+			department_name: department,
+			price: price,
+			stock_quantity: quantity
+		},
+		function(error, results) {
+			// throw error, else log product added and display the view products table/
+			// return to welcome screen
+			if (error) throw error;
+			console.log("\nNew product successfully added.");
+			viewProducts();
+	});
 }
 
 // function for building console table

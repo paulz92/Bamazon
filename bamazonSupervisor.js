@@ -53,8 +53,65 @@ function viewSales() {
 
 // function to create new department
 function createDepartment() {
-	console.log("create dept --- will function later");
-	welcome();
+	// query db to display console table of current departments
+	connection.query("SELECT * FROM departments", function (error, results) {
+		if (error) throw error;
+		// display current departments
+		consoleTable("\nCurrent Department Data", results);
+		// ask for new dept name and overhead for it
+		inquirer.prompt([
+			{
+				name: "name",
+				message: "Please input new department name."
+			},
+			{
+				name: "overhead",
+				message: "Input new department overhead costs.",
+				// validate the overhead is a number larger than 0
+				validate: function(value) {
+					if (isNaN(value) === false && value > 0) {
+						return true;
+					}
+					return false;
+				}
+			}
+		]).then(function(newDept) {
+			// query db for an insertion into the departments table, set name/costs equal
+			// to supervisor input
+			connection.query(
+				"INSERT INTO departments SET ?",
+				{
+					department_name: newDept.name,
+					over_head_costs: parseFloat(newDept.overhead).toFixed(2)
+				}, 
+				function(error, results) {
+					// if error, tell us, else log success and return to welcome screen
+					if (error) throw error;
+					console.log("\nNew department added successfully.\n");
+					welcome();
+			});
+		});
+	});
+}
+
+// function for building console tables
+function consoleTable(title, results) {
+	// init empty values array for console table
+	var values = [];
+	// loop through all results
+	for (var i = 0; i < results.length; i++) {
+		// save info to an object on each iteration, object properties will be 
+		// column headers in console table
+		var resultObject = {
+			ID: results[i].department_id,
+			Department: results[i].department_name,
+			Overhead: "$" + results[i].over_head_costs,
+		};
+		// push the resultObject to values array
+		values.push(resultObject);
+	}
+	// create table titled prod inv data with data in values array
+	console.table(title, values);
 }
 
 // exit function ends connection to db

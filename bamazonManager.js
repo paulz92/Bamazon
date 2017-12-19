@@ -143,55 +143,66 @@ function increaseQty(item, stockQty, addQty) {
 			}
 		], 
 		function(error, results) {
+			// throw error, else log inventory updated and return to welcome screen
 			if (error) throw error;
-			console.log("\nInventory successfully increased.");
-			// run viewProducts so manager can see the updated inventory and return
-			// to welcome screen
-			viewProducts();
+			console.log("\nInventory successfully increased.\n");
+			welcome();
 	});
 }
 
 // function to add new product
 function addNewProduct() {
-	// collect item data
-	inquirer.prompt([
-		{
-			name: "item",
-			message: "Input new item to add."
-		},
-		{
-			name: "department",
-			type: "list",
-			choices: ["Music", "Movies", "Electronics", "Toys", "Household", "Clothes",
-				"Hardware", "Sports Equipment", "Other"],
-			message: "Which department does this item belong in?"
-		},
-		{
-			name: "price",
-			message: "How much does this item cost?",
-			// validate the cost is a number above/equal to 0 (could be free)
-			validate: function(value) {
-				if (value >= 0 && isNaN(value) === false) {
-					return true;
+	// querying prior to inquirer so that I can build the choices array from all 
+	// available departments
+	connection.query("SELECT * FROM departments", function (error, results) {
+		// collect item data
+		inquirer.prompt([
+			{
+				name: "item",
+				message: "Input new item to add."
+			},
+			{
+				name: "department",
+				type: "list",
+				choices: function() {
+					// empty array
+					var deptArray = [];
+					// filling array with all detps from table
+					for (var i = 0; i < results.length; i++) {
+						deptArray.push(results[i].department_name);
+					}
+					// returning filled array
+					return deptArray;
+				},
+				message: "Which department does this item belong in?"
+			},
+			{
+				name: "price",
+				message: "How much does this item cost?",
+				// validate the cost is a number above/equal to 0 (could be free)
+				validate: function(value) {
+					if (value >= 0 && isNaN(value) === false) {
+						return true;
+					}
+					return false;
 				}
-				return false;
+			},
+			{
+				name: "inventory",
+				message: "How much inventory do we have?",
+				// validate the qty is a number above 0
+				validate: function(value) {
+					if (value > 0 && isNaN(value) === false) {
+						return true;
+					}
+					return false;
+				}			
 			}
-		},
-		{
-			name: "inventory",
-			message: "How much inventory do we have?",
-			// validate the qty is a number above 0
-			validate: function(value) {
-				if (value > 0 && isNaN(value) === false) {
-					return true;
-				}
-				return false;
-			}			
-		}
-	]).then(function(newItem) {
-		// then call the add item to dB function with values from inquirer
-		addItemToDb(newItem.item, newItem.department, 
-			parseFloat(newItem.price).toFixed(2), parseInt(newItem.inventory));
+		]).then(function(newItem) {
+			// then call the add item to dB function with values from inquirer
+			addItemToDb(newItem.item, newItem.department, 
+				parseFloat(newItem.price).toFixed(2), parseInt(newItem.inventory));
+		});
 	});
 }
 
@@ -207,11 +218,10 @@ function addItemToDb(item, department, price, quantity) {
 			stock_quantity: quantity
 		},
 		function(error, results) {
-			// throw error, else log product added and display the view products table/
-			// return to welcome screen
+			// throw error, else log product added and return to welcome screen
 			if (error) throw error;
-			console.log("\nNew product successfully added.");
-			viewProducts();
+			console.log("\nNew product successfully added.\n");
+			welcome();
 	});
 }
 

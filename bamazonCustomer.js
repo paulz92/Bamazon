@@ -49,7 +49,7 @@ function welcome() {
 // view items function
 function viewItems() {
 	// save my sql query
-	var query = "SELECT item_id, product_name, price, stock_quantity FROM products";
+	var query = "SELECT * FROM products";
 	// query db display results
 	connection.query(query, function(error, results) {
 		// if error, tell us
@@ -86,12 +86,14 @@ function viewItems() {
 			var itemQty;
 			var itemPrice;
 			var itemName;
+			var productSales;
 			// set above vars equal to results where the user id matches db id
 			for (var j = 0; j < results.length; j++) {
 				if (parseInt(transaction.id) === results[j].item_id) {
 					itemQty = results[j].stock_quantity;
 					itemPrice = results[j].price;
 					itemName = results[j].product_name;
+					productSales = results[j].product_sales;
 				}
 			}
 			// if user tries to buy more qty than db has available, tell them no, run the
@@ -102,11 +104,13 @@ function viewItems() {
 				welcome();
 			} 
 			// if user tries to buy equal/less qty than db has available, tell them yes,
-			// update the db to reduce qty by customer purchase amt
+			// update the db to reduce qty by customer purchase amt, update product sales
+			// with revenue from the sale
 			else if (parseInt(transaction.qty) <= itemQty) {
 				console.log("\nCongrats! You successfully purchased " + transaction.qty 
 					+ " of " + itemName + ".");
 				lowerQty(transaction.id, transaction.qty, itemQty, itemPrice);
+				salesRevenue(transaction.id, transaction.qty, productSales, itemPrice);
 			}
 		});
 	});
@@ -149,19 +153,32 @@ function lowerQty(item, purchaseQty, stockQty, price) {
 		// throw error if error, else run displayCost
 		function(error, response) {
 			if (error) throw error;
-			displayCost(purchaseQty, price);
 	});
 }
 
-// display total cost function
-function displayCost(purchaseQty, price) {
-	// save customer cost as variable - their qty * db price
+// add sales rev function
+function salesRevenue(item, purchaseQty, productSales, price) {
 	var customerCost = parseInt(purchaseQty) * price;
-	// log it fixed to 2 decimals
-	console.log("The total price is $" + customerCost.toFixed(2) 
-		+ ". Gotta love no sales tax. Thanks for you purchase!\n");
-	// run welcome function
-	welcome();
+	// query with an update, set product rev equal to current product sales + 
+	// purchase qty * price where the item id equals the id the user entered
+	connection.query(
+		"UPDATE products SET ? WHERE ?", 
+		[
+			{
+				product_sales: productSales + customerCost
+			}, 
+			{
+				item_id: parseInt(item)
+			}
+		], 
+		function(error, response) {
+			if (error) throw error;
+			// log it fixed to 2 decimals to tell customer what their price was
+			console.log("The total price is $" + customerCost.toFixed(2) 
+				+ ". Gotta love no sales tax. Thanks for you purchase!\n");
+			// run welcome function
+			welcome();
+	});
 }
 
 // exit function says bye to user and ends db connection

@@ -47,22 +47,55 @@ function welcome() {
 
 // function to view departmental sales
 function viewSales() {
-	console.log("view sales --- will function later");
-	welcome();
+	// building query variable for inner join
+	// selecting dept id, dept name, OH costs, sum(product sales) with alias product
+	// sales, and sum(product sales) - OH costs with alias total profit - these will
+	// be the resulting table headers
+	// from departments table, inner join products table where dept names equal each 
+	// other. group by dept id
+	var joinQuery = "SELECT department_id, departments.department_name, over_head_costs,"
+		+ " SUM(product_sales) AS product_sales," 
+		+ " SUM(product_sales) - over_head_costs AS total_profit ";
+	joinQuery += "FROM departments INNER JOIN products ";
+	joinQuery += "ON departments.department_name = products.department_name ";
+	joinQuery += "GROUP BY department_id ";
+
+	// query the db, throw error if error, if not, build and print console table
+	// return to welcome screen
+	connection.query(joinQuery, function(error, results) {
+		if (error) throw error;
+		consoleTableProfit("\nDepartmental Profit", results);
+		welcome();
+	});
 }
 
 // function to create new department
 function createDepartment() {
-	// query db to display console table of current departments
+	// query db to display console table of current departments and validate supervisor
+	// isn't adding a dept that already exists
 	connection.query("SELECT * FROM departments", function (error, results) {
 		if (error) throw error;
 		// display current departments
-		consoleTable("\nCurrent Department Data", results);
+		consoleTableDept("\nCurrent Department Data", results);
 		// ask for new dept name and overhead for it
 		inquirer.prompt([
 			{
 				name: "name",
-				message: "Please input new department name."
+				message: "Please input new department name.",
+				// validating dept doesn't already exist
+				validate: function(value) {
+					// create empty dept array
+					var deptArray = [];
+					// push all current depts to array
+					for (var i = 0; i < results.length; i++) {
+						deptArray.push(results[i].department_name.toLowerCase());
+					}
+					// if supervisor input not in array, return true, else return false
+					if (deptArray.indexOf(value.toLowerCase()) === -1) {
+						return true;
+					}
+					return false;
+				}
 			},
 			{
 				name: "overhead",
@@ -94,8 +127,8 @@ function createDepartment() {
 	});
 }
 
-// function for building console tables
-function consoleTable(title, results) {
+// function for building console table for viewing total profit
+function consoleTableProfit(title, results) {
 	// init empty values array for console table
 	var values = [];
 	// loop through all results
@@ -105,7 +138,29 @@ function consoleTable(title, results) {
 		var resultObject = {
 			ID: results[i].department_id,
 			Department: results[i].department_name,
-			Overhead: "$" + results[i].over_head_costs,
+			Overhead: "$" + results[i].over_head_costs.toFixed(2),
+			Product_Sales: "$" + results[i].product_sales.toFixed(2),
+			Total_Profit: "$" + results[i].total_profit.toFixed(2)
+		};
+		// push the resultObject to values array
+		values.push(resultObject);
+	}
+	// create table titled prod inv data with data in values array
+	console.table(title, values);
+}
+
+// function for building console table for adding new dept function
+function consoleTableDept(title, results) {
+	// init empty values array for console table
+	var values = [];
+	// loop through all results
+	for (var i = 0; i < results.length; i++) {
+		// save info to an object on each iteration, object properties will be 
+		// column headers in console table
+		var resultObject = {
+			ID: results[i].department_id,
+			Department: results[i].department_name,
+			Overhead: "$" + results[i].over_head_costs.toFixed(2),
 		};
 		// push the resultObject to values array
 		values.push(resultObject);

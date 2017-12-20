@@ -31,10 +31,7 @@ Video link coming soon
 		npm install
 
 - Open MySQL Workbench, SQL Pro, or your preferred database management app. Open the "bamazon.sql" script from the cloned repo, and run it to set up the database and base product/department data.
-- Next, you'll need to update the js files with your password to access your localhost server, assuming your server requires one. You may add it using one of two options.
-
-####Option 1
-- Inside the cloned repo, create a pw.js file with the following code, and add you password to that file.
+- Next, within the cloned repo, you'll need to create a pw.js file with the following code, and add your password to access your root server to that file. This file is a dependency for the app. If you do not require a password to access your root, simply leave the pw property as an empty string.
 
 	var pwd = {
 		pw: "YOUR PASSWORD HERE"
@@ -42,40 +39,21 @@ Video link coming soon
 	
 	module.exports = pwd;
 
-####Option 2 
-- Remove the requirement for the pw.js file and add your password directly to the bamazonCustomer, bamazonManager, and bamazonSupervisor files.
-
-	// npm requirements
-	var inquirer = require("inquirer");
-	var mysql = require("mysql");
-	var consoleTableNPM = require("console.table");
-	// my password for mysql db connection - hidden
-	var pw = require("./pw.js"); **<-- REMOVE**
-
-	// create mysql connection
-	var connection = mysql.createConnection({
-		host: "localhost",
-		port: 3306,
-		user: "root",
-		password: pw.pw, **<- REMOVE, insert your password here in quotes**
-		database: "bamazon_db"
-	});
-
 - You're ready to go!
 
 ## How to use?
-###Customers
-	- Run the following in your CLI while inside your cloned repo directory
+**Customers**
+- Run the following in your CLI while inside your cloned repo directory
 
 		node bamazonCustomer.js
 
-	- Select from the resulting screen whether you would like to view items or leave.
-	- If you select view items, input and enter the item id that you would like to purchase
-	- Input and enter the quantity that you would like to buy
-	- If you would like to buy another item, repeat
-	- If you would like to leave, click exit
+- Select from the resulting screen whether you would like to view items or leave.
+- If you select view items, input and enter the item id that you would like to purchase
+- Input and enter the quantity that you would like to buy
+- If you would like to buy another item, repeat
+- If you would like to leave, click exit
 
-###Managers
+**Managers**
 - Run the following in your CLI while inside your cloned repo directory
 
 		node bamazonManager.js
@@ -85,7 +63,7 @@ Video link coming soon
 - If you select add new product, follow the prompts for item name, department, price, and quantity in stock
 - When you are ready to leave, click exit
 
-###Supervisors
+**Supervisors**
 - Run the following in your CLI while inside your cloned repo directory
 
 		node bamazonSupervisor.js

@@ -33,7 +33,8 @@ Video link coming soon
 - Open MySQL Workbench, SQL Pro, or your preferred database management app. Open the "bamazon.sql" script from the cloned repo, and run it to set up the database and base product/department data.
 - Next, you'll need to update the js files with your password to access your localhost server, assuming your server requires one. You may add it using one of two options.
 
-	- Option 1: Inside the cloned repo, create a pw.js file with the following code, and add you password to that file.
+####Option 1
+- Inside the cloned repo, create a pw.js file with the following code, and add you password to that file.
 
 	var pwd = {
 		pw: "YOUR PASSWORD HERE"
@@ -41,7 +42,8 @@ Video link coming soon
 	
 	module.exports = pwd;
 
-	- Option 2: Remove the requirement for the pw.js file and add your password directly to the bamazonCustomer, bamazonManager, and bamazonSupervisor files.
+####Option 2 
+- Remove the requirement for the pw.js file and add your password directly to the bamazonCustomer, bamazonManager, and bamazonSupervisor files.
 
 	// npm requirements
 	var inquirer = require("inquirer");
@@ -62,7 +64,7 @@ Video link coming soon
 - You're ready to go!
 
 ## How to use?
-- Customers
+###Customers
 	- Run the following in your CLI while inside your cloned repo directory
 
 		node bamazonCustomer.js
@@ -73,24 +75,24 @@ Video link coming soon
 	- If you would like to buy another item, repeat
 	- If you would like to leave, click exit
 
-- Managers
-	- Run the following in your CLI while inside your cloned repo directory
+###Managers
+- Run the following in your CLI while inside your cloned repo directory
 
 		node bamazonManager.js
 
-	- Select from the resulting screen whether you would like to view products for sale, view low inventory, add to inventory, add new product, or exit.
-	- If you select add to inventory, follow the prompts for item id to increase inventory on and quantity to increase inventory
-	- If you select add new product, follow the prompts for item name, department, price, and quantity in stock
-	- When you are ready to leave, click exit
+- Select from the resulting screen whether you would like to view products for sale, view low inventory, add to inventory, add new product, or exit.
+- If you select add to inventory, follow the prompts for item id to increase inventory on and quantity to increase inventory
+- If you select add new product, follow the prompts for item name, department, price, and quantity in stock
+- When you are ready to leave, click exit
 
-- Supervisors
-	- Run the following in your CLI while inside your cloned repo directory
+###Supervisors
+- Run the following in your CLI while inside your cloned repo directory
 
 		node bamazonSupervisor.js
 
-	- Select from the resulting screen whether you would like to view product sales by department, create a new department, or exit.
-	- If you select create new department, follow the prompts for department name and overhead costs
-	- When you are ready to leave, click exit
+- Select from the resulting screen whether you would like to view product sales by department, create a new department, or exit.
+- If you select create new department, follow the prompts for department name and overhead costs
+- When you are ready to leave, click exit
 
 ## Credits
 UNC Chapel Hill Coding Boot Camp
